@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "init:keyfile": "hypershell-keygen -f ./keyfile",
-    "start:server": "hypershell-server -f ./keyfile --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3000",
+    "start:server": "hypershell-server -f ./keyfile --firewall ./firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3000",
     "start:client": "hypershell -f ./keyfile llm-provider -L 127.0.0.1:8082:127.0.0.1:3000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
