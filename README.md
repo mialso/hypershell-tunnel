@@ -1,11 +1,13 @@
-### pipe experiments
+# pipe experiments
 
-#### setup
+## setup
+
 ```shell
 npm run init:keyfile
 ```
 
-#### server
+## server
+
 ```shell
 # obtain public key for the client
 cat ./keyfile
@@ -13,7 +15,10 @@ cat ./keyfile
 npm run start:server
 ```
 
-#### client
+## client
+
 ```shell
-npm run 
+npm run start:client
 ```
+
+> checkout opencode.json config example

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "enabled_providers": ["myprovider"],
+  "provider": {
+    "myprovider": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "local mlx",
+      "options": {
+        "baseURL": "http://127.0.0.1:8082/v1"
+      },
+      "models": {
+        "7182148780f44d4cace532db70dc0bbb837874b3": {
+          "id": "7182148780f44d4cace532db70dc0bbb837874b3",
+          "name": "GLM 4.7",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 202752,
+            "output": 128000
+          },
+          "cost": {
+            "input": 0.6,
+            "output": 2.2,
+            "cache_read": 0.11,
+            "cache_write": 0
+          }
+        },
+        "91938a18414002617d5c5de2220886cfbb6579ba": {
+          "id": "91938a18414002617d5c5de2220886cfbb6579ba",
+          "name": "Minimax M2",
+          "family": "minimax",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 196608,
+            "output": 128000
+          },
+          "cost": {
+            "input": 0.3,
+            "output": 1.2,
+            "cache_read": 0.03,
+            "cache_write": 0.375
+          }
+        },
+        "ec4a611a75670ac0ecf4e744f83d69b0d3ba7ffd": {
+          "id": "ec4a611a75670ac0ecf4e744f83d69b0d3ba7ffd",
+          "name": "Qwen3 Coder 30B A3B instruct bf16",
+          "family": "qwen3_moe",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 262144,
+            "output": 128000
+          }
+        }
+      }
+    }
+  }
+}
