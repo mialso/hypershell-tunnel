@@ -3,6 +3,7 @@
 ## setup
 
 ```shell
+npm ci
 npm run init:keyfile
 ```
 
