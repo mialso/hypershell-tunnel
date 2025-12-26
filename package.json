@@ -1,0 +1,16 @@
+{
+  "name": "hypershell-pipe",
+  "version": "1.0.0",
+  "description": "pipe example",
+  "license": "ISC",
+  "author": "mialso",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "init-keyfile": "npx hypershell-keygen -f ./keyfile -c initial-key",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "hypershell": "0.0.15"
+  }
+}
