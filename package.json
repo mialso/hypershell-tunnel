@@ -1,13 +1,14 @@
 {
-  "name": "hypershell-pipe",
+  "name": "hypershell-tunnel",
   "version": "1.0.0",
-  "description": "pipe example",
+  "description": "tunnel example",
   "license": "ISC",
   "author": "mialso",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "init-keyfile": "npx hypershell-keygen -f ./keyfile -c initial-key",
+    "init:keyfile": "npx hypershell-keygen -f ./keyfile -c initial-key",
+    "start:server": "npx hypershell-server f ./keyfile --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
