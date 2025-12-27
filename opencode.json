@@ -1,5 +1,38 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "tools": {
+    "task": false,
+    "webfetch": false,
+    "patch": false,
+    "skill": false
+  },
+  "agent": {
+    "plan": {
+      "tools": {
+        "bash": false,
+        "edit": false,
+        "write": false
+      }
+    },
+    "ask": {
+      "mode": "primary",
+      "description": "free form questions",
+      "prompt": "You are a helpfull assitant",
+      "tools": {
+        "bash": false,
+        "edit": false,
+        "write": false,
+        "read": false,
+        "grep": false,
+        "glob": false,
+        "list": false,
+        "lsp": false,
+        "todowrite": false,
+        "todoread": false,
+        "webfetch": true
+      }
+    }
+  },
   "enabled_providers": ["myprovider"],
   "provider": {
     "myprovider": {
