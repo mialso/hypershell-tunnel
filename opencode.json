@@ -9,7 +9,6 @@
   "agent": {
     "plan": {
       "tools": {
-        "bash": false,
         "edit": false,
         "write": false
       }
@@ -33,17 +32,18 @@
       }
     }
   },
-  "enabled_providers": ["myprovider"],
+  "enabled_providers": ["my-lm-studio"],
+  "small_model": "my-lm-studio/qwen3-coder-30b-instruct",
   "provider": {
-    "myprovider": {
+    "my-lm-studio": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "local mlx",
+      "name": "my-lm-studio",
       "options": {
         "baseURL": "http://127.0.0.1:8082/v1"
       },
       "models": {
-        "7182148780f44d4cace532db70dc0bbb837874b3": {
-          "id": "7182148780f44d4cace532db70dc0bbb837874b3",
+        "glm-4.7": {
+          "id": "glm-4.7",
           "name": "GLM 4.7",
           "tool_call": true,
           "reasoning": true,
@@ -56,10 +56,14 @@
             "output": 2.2,
             "cache_read": 0.11,
             "cache_write": 0
+          },
+          "options": {
+            "enable_thinking": true,
+            "clear_thinking": false
           }
         },
-        "91938a18414002617d5c5de2220886cfbb6579ba": {
-          "id": "91938a18414002617d5c5de2220886cfbb6579ba",
+        "minimax-m2": {
+          "id": "minimax-m2",
           "name": "Minimax M2",
           "family": "minimax",
           "tool_call": true,
@@ -75,14 +79,102 @@
             "cache_write": 0.375
           }
         },
-        "ec4a611a75670ac0ecf4e744f83d69b0d3ba7ffd": {
-          "id": "ec4a611a75670ac0ecf4e744f83d69b0d3ba7ffd",
+        "qwen3-coder-30b-instruct": {
+          "id": "qwen3-coder-30b-instruct",
           "name": "Qwen3 Coder 30B A3B instruct bf16",
           "family": "qwen3_moe",
           "tool_call": true,
           "reasoning": true,
           "limit": {
             "context": 262144,
+            "output": 128000
+          }
+        },
+        "9ac30590770f92c33f1744dcc86d9ca9a7ff49d0": {
+          "id": "9ac30590770f92c33f1744dcc86d9ca9a7ff49d0",
+          "name": "Nemotron Orchestrator 8B mlx f32",
+          "family": "qwen3",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 40960,
+            "output": 128000
+          }
+        },
+        "intellect-3": {
+          "id": "intellect-3",
+          "name": "INTELLECT-3-8bit-gs32",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 131072,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "my-mlx-server": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "my-mlx-server",
+      "options": {
+        "baseURL": "http://127.0.0.1:8081/v1"
+      },
+      "models": {
+        "glm-4.7": {
+          "id": "glm-4.7",
+          "name": "GLM 4.7",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 202752,
+            "output": 128000
+          },
+          "cost": {
+            "input": 0.6,
+            "output": 2.2,
+            "cache_read": 0.11,
+            "cache_write": 0
+          },
+          "options": {
+            "enable_thinking": true,
+            "clear_thinking": false
+          }
+        },
+        "minimax-m2": {
+          "id": "minimax-m2",
+          "name": "Minimax M2",
+          "family": "minimax",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 196608,
+            "output": 128000
+          },
+          "cost": {
+            "input": 0.3,
+            "output": 1.2,
+            "cache_read": 0.03,
+            "cache_write": 0.375
+          }
+        },
+        "qwen3-coder-30b-instruct": {
+          "id": "qwen3-coder-30b-instruct",
+          "name": "Qwen3 Coder 30B A3B instruct bf16",
+          "family": "qwen3_moe",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 262144,
+            "output": 128000
+          }
+        },
+        "intellect-3": {
+          "id": "intellect-3",
+          "name": "INTELLECT-3-8bit-gs32",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 131072,
             "output": 128000
           }
         }

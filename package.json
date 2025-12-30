@@ -7,9 +7,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "init:keyfile": "hypershell-keygen -f ./keyfile",
-    "start:server": "hypershell-server -f ./keyfile --firewall ./firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3000",
-    "start:client": "hypershell -f ./keyfile llm-provider -L 127.0.0.1:8082:127.0.0.1:3000",
+    "init:keyfile:lm": "hypershell-keygen -f ./lm-keyfile",
+    "init:keyfile:mx": "hypershell-keygen -f ./mx-keyfile",
+    "start:server:lm": "hypershell-server -f ./lm-keyfile --firewall ./lm-firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3082",
+    "start:server:mx": "hypershell-server -f ./mx-keyfile --firewall ./mx-firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3081",
+    "start:client:lm": "hypershell -f ./lm-keyfile lm-provider -L 127.0.0.1:8082:127.0.0.1:3082",
+    "start:client:mx": "hypershell -f ./mx-keyfile mx-provider -L 127.0.0.1:8081:127.0.0.1:3081",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
