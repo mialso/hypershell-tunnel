@@ -32,7 +32,7 @@
       }
     }
   },
-  "enabled_providers": ["my-lm-studio"],
+  "enabled_providers": ["my-lm-studio", "my-mlx-server"],
   "small_model": "my-lm-studio/qwen3-coder-30b-instruct",
   "provider": {
     "my-lm-studio": {
