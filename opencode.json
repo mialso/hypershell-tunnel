@@ -141,7 +141,7 @@
           }
         },
         "minimax-m2": {
-          "id": "minimax-m2",
+          "id": "mlx-community/MiniMax-M2.1-8bit-gs32",
           "name": "Minimax M2",
           "family": "minimax",
           "tool_call": true,
@@ -155,6 +155,16 @@
             "output": 1.2,
             "cache_read": 0.03,
             "cache_write": 0.375
+          }
+        },
+        "Nemotron-3-Nano": {
+          "id": "nemotron-3-nano",
+          "name": "Nemotron 3 Nano",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 1000000,
+            "output": 128000
           }
         },
         "qwen3-coder-30b-instruct": {
