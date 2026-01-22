@@ -32,8 +32,8 @@
       }
     }
   },
-  "enabled_providers": ["my-lm-studio", "my-mlx-server"],
-  "small_model": "my-lm-studio/qwen3-coder-30b-instruct",
+  "enabled_providers": ["my-lm-studio", "my-mlx-server", "my-mlx-sm-server"],
+  "small_model": "my-mlx-sm-server/qwen3-coder-30b-instruct",
   "provider": {
     "my-lm-studio": {
       "npm": "@ai-sdk/openai-compatible",
@@ -108,6 +108,26 @@
           "reasoning": true,
           "limit": {
             "context": 131072,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "my-mlx-sm-server": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "my-mlx-sm-server",
+      "options": {
+        "baseURL": "http://127.0.0.1:8083/v1"
+      },
+      "models": {
+        "qwen3-coder-30b-instruct": {
+          "id": "mlx-community/Qwen3-Coder-30B-A3B-Instruct-bf16",
+          "name": "Qwen3 Coder 30B A3B instruct bf16",
+          "family": "qwen3_moe",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 262144,
             "output": 128000
           }
         }

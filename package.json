@@ -17,7 +17,7 @@
     "start:server:ssh": "hypershell-server -f ./ssh-keyfile --firewall ./ssh-firewall --protocol shell",
     "start:client:lm": "hypershell -f ./lm-keyfile lm-provider -L 127.0.0.1:8082:127.0.0.1:3082",
     "start:client:mx": "hypershell -f ./mx-keyfile mx-provider -L 127.0.0.1:8081:127.0.0.1:3081",
-    "start:client:mx-sm": "hypershell -f ./mx-keyfile mx-sm-provider -L 127.0.0.1:8083:127.0.0.1:3083",
+    "start:client:mx-sm": "hypershell -f ./mx-sm-keyfile mx-sm-provider -L 127.0.0.1:8083:127.0.0.1:3083",
     "start:client:ssh": "hypershell -f ./ssh-keyfile ssh-provider",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
