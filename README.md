@@ -11,6 +11,8 @@ npm run init:keyfile:mx
 # for the client - get the public key - should be added to a server "firewall" whitelist
 ```
 
+> note: "ssh" suffix for a complete ssh-like shell
+
 ### server
 
 ```shell
