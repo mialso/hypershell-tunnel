@@ -42,6 +42,20 @@
         "baseURL": "http://127.0.0.1:8082/v1"
       },
       "models": {
+        "glm-4.7-flash-bf16": {
+          "id": "mlx-community/GLM-4.7-Flash-bf16",
+          "name": "GLM 4.7 Flash",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 202752,
+            "output": 128000
+          },
+          "options": {
+            "enable_thinking": true,
+            "clear_thinking": false
+          }
+        },
         "glm-4.7": {
           "id": "glm-4.7",
           "name": "GLM 4.7",
@@ -120,14 +134,14 @@
         "baseURL": "http://127.0.0.1:8083/v1"
       },
       "models": {
-        "qwen3-coder-30b-instruct": {
-          "id": "mlx-community/Qwen3-Coder-30B-A3B-Instruct-bf16",
-          "name": "Qwen3 Coder 30B A3B instruct bf16",
-          "family": "qwen3_moe",
-          "tool_call": true,
-          "reasoning": true,
+        "qwen3-0.6b-bf16": {
+          "id": "mlx-community/Qwen3-0.6B-bf16",
+          "name": "Qwen3 0.6B bf16",
+          "family": "qwen3",
+          "tool_call": false,
+          "reasoning": false,
           "limit": {
-            "context": 262144,
+            "context": 32000,
             "output": 128000
           }
         }
@@ -175,6 +189,20 @@
             "output": 1.2,
             "cache_read": 0.03,
             "cache_write": 0.375
+          }
+        },
+        "glm-4.7-flash-bf16": {
+          "id": "mlx-community/GLM-4.7-Flash-bf16",
+          "name": "GLM 4.7 Flash",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 128000,
+            "output": 128000
+          },
+          "options": {
+            "enable_thinking": true,
+            "clear_thinking": false
           }
         },
         "Nemotron-3-Nano": {
