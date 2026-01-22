@@ -3,11 +3,15 @@
 ## private llm inference p2p-share example
 
 ### setup
+* lm: lm-studio runtime (runs multiple models, slow, need exact model-id)
+* mx: mlx-openai-server main model
+* mx-sm: mlx-openai-server small model
 
 ```shell
 npm ci
 npm run init:keyfile:lm
 npm run init:keyfile:mx
+npm run init:keyfile:mx-sm
 # for the client - get the public key - should be added to a server "firewall" whitelist
 ```
 
@@ -18,6 +22,7 @@ npm run init:keyfile:mx
 ```shell
 # start listen
 npm run start:server:mx
+npm run start:server:mx-sm
 npm run start:server:lm
 # obtain public key - use later for client "known_peers"
 ```
@@ -32,12 +37,14 @@ npm run start:server:lm
 # <name> <public key>
 lm-provider 1234..<key>..6789
 mx-provider 9876..<key>..4321
+mx-sm-provider 9876..<key>..4321
 ```
 > note: "llm-provider" name is required to connect to the server
 
 ```shell
 npm run start:client:lm
 npm run start:client:mx
+npm run start:client:mx-sm
 ```
 
 > opencode: checkout opencode.json config example to setup

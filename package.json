@@ -9,12 +9,15 @@
   "scripts": {
     "init:keyfile:lm": "hypershell-keygen -f ./lm-keyfile",
     "init:keyfile:mx": "hypershell-keygen -f ./mx-keyfile",
+    "init:keyfile:mx-sm": "hypershell-keygen -f ./mx-sm-keyfile",
     "init:keyfile:ssh": "hypershell-keygen -f ./ssh-keyfile",
     "start:server:lm": "hypershell-server -f ./lm-keyfile --firewall ./lm-firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3082",
     "start:server:mx": "hypershell-server -f ./mx-keyfile --firewall ./mx-firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3081",
-    "start:server:ssh": "hypershell -f ./ssh-keyfile --firewall ./ssh-firewall",
+    "start:server:mx-sm": "hypershell-server -f ./mx-sm-keyfile --firewall ./mx-sm-firewall --protocol tunnel --tunnel-host 127.0.0.1 --tunnel-port 3083",
+    "start:server:ssh": "hypershell-server -f ./ssh-keyfile --firewall ./ssh-firewall --protocol shell",
     "start:client:lm": "hypershell -f ./lm-keyfile lm-provider -L 127.0.0.1:8082:127.0.0.1:3082",
     "start:client:mx": "hypershell -f ./mx-keyfile mx-provider -L 127.0.0.1:8081:127.0.0.1:3081",
+    "start:client:mx-sm": "hypershell -f ./mx-keyfile mx-sm-provider -L 127.0.0.1:8083:127.0.0.1:3083",
     "start:client:ssh": "hypershell -f ./ssh-keyfile ssh-provider",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
