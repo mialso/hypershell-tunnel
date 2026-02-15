@@ -47,4 +47,13 @@ npm run start:client:mx
 npm run start:client:mx-sm
 ```
 
-> opencode: checkout opencode.json config example to setup
+### copy files
+```shell
+# start server on a peer (llm-host) machine
+npm run start:server:ssh
+# target machine
+npm run copy:llm-host @llm-host:/Users/me/.cache/huggingface/hub/models--mlx-community--MiniMax-M2.5-8bit-gs32 /media/me/llm-storage/llm-hub/models--mlx-community--MiniMax-M2.5-8bit-gs32
+```
+> ensure "llm-host" is set correct at `~/.hypershell/known_peers`
+
+### opencode: checkout opencode.json config example to setup
