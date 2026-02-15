@@ -175,7 +175,7 @@
           }
         },
         "minimax-m2": {
-          "id": "mlx-community/MiniMax-M2.1-8bit-gs32",
+          "id": "mlx-community/MiniMax-M2.5-8bit-gs32",
           "name": "Minimax M2",
           "family": "minimax",
           "tool_call": true,
@@ -223,6 +223,27 @@
           "reasoning": true,
           "limit": {
             "context": 262144,
+            "output": 128000
+          }
+        },
+        "qwen3-coder-next": {
+          "id": "qwen3-coder-next",
+          "name": "Qwen3 Coder Next bf16",
+          "family": "qwen3_moe",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 262144,
+            "output": 128000
+          }
+        },
+        "step-3.5-flash": {
+          "id": "step-3.5-flash",
+          "name": "Step 3.5 Flash",
+          "tool_call": true,
+          "reasoning": true,
+          "limit": {
+            "context": 256000,
             "output": 128000
           }
         },
