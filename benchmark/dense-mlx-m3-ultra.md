@@ -32,15 +32,6 @@
 ```
 
 #### 4B
-* mlx-community/Qwen3-4B-bf16
-```bash
-% mlx_lm.benchmark --model mlx-community/Qwen3-4B-bf16 -p 1500 -g 1500 -n 2
-  Averages: prompt_tps=2685.477, generation_tps=66.956, peak_memory=8.814
-% mlx_lm.benchmark --model mlx-community/Qwen3-4B-bf16 -p 100000 -n 2
-  Timing with prompt_tokens=100000, generation_tokens=1024, batch_size=1
-  Averages: prompt_tps=590.244, generation_tps=25.876, peak_memory=23.854
-```
-
 * mlx-community/Qwen3-4B-8bit
 ```bash
 % mlx_lm.benchmark --model mlx-community/Qwen3-4B-8bit -p 1500 -g 1500 -n 2
@@ -63,6 +54,14 @@
   Averages: prompt_tps=2742.216, generation_tps=150.983, peak_memory=3.267
 % mlx_lm.benchmark --model mlx-community/Qwen3-4B-4bit -p 15000 -g 1500 -n 2
   Averages: prompt_tps=1872.776, generation_tps=99.210, peak_memory=5.185
+```
+
+* mlx-community/Qwen3.5-4B-bf16
+```bash
+% mlx_lm.benchmark --model mlx-community/Qwen3.5-4B-bf16 -p 1500 -g 1500 -n 2
+  Averages: prompt_tps=2575.877, generation_tps=64.986, peak_memory=9.675
+% mlx_lm.benchmark --model mlx-community/Qwen3.5-4B-bf16 -p 15000 -g 1500 -n 2
+  Averages: prompt_tps=2481.945, generation_tps=61.660, peak_memory=11.271
 ```
 
 * mlx-community/Qwen3.5-4B-8bit
