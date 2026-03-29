@@ -57,3 +57,7 @@ npm run copy:llm-host @llm-host:/Users/me/.cache/huggingface/hub/models--mlx-com
 > ensure "llm-host" is set correct at `~/.hypershell/known_peers`
 
 ### opencode: checkout opencode.json config example to setup
+```bash
+ipconfig getifaddr en1
+rsync -ahP user@192.168.68.108:/Users/user/.cache/huggingface/hub/models--mlx-community--Qwen3.5-4B-8bit ~/.cache/huggingface/hub/
+```
