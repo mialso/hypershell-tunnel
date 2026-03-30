@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Scaling Performance - MLX vs GGUF</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .controls {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .chart-container {
+            padding: 30px 40px;
+            position: relative;
+            height: 500px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 30px 40px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+
+        .stat-detail {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .legend-custom {
+            padding: 20px 40px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .legend-custom h3 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .info-box {
+            padding: 15px 40px;
+            background: #e7f5ff;
+            border-left: 4px solid #1c7ed6;
+            margin: 0 40px 30px;
+            border-radius: 8px;
+        }
+
+        .info-box strong {
+            color: #1864ab;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Context Scaling Performance Analysis</h1>
+            <p>
+                Comparing MLX vs llama.cpp GGUF implementations across Qwen3 models on Apple Silicon.
+                This chart shows <strong>generation TPS (tokens-per-second)</strong> at different context lengths,
+                illustrating how performance degrades as context increases.
+            </p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Hardware</label>
+                <select id="hardwareSelect">
+                    <option value="m3_ultra">M3 Ultra (512GB)</option>
+                    <option value="m4_pro">M4 Pro (24GB)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Model Size</label>
+                <select id="sizeSelect">
+                    <option value="all">All Sizes</option>
+                    <option value="0.8B">0.8B Models</option>
+                    <option value="4B">4B Models</option>
+                    <option value="27B">27B Models</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Metric</label>
+                <select id="metricSelect">
+                    <option value="generation">Generation TPS (tg1500)</option>
+                    <option value="prompt">Prompt TPS (pp)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="info-box" id="infoBox">
+            <strong>Tip:</strong> Hover over chart lines to see exact TPS values and degradation percentages.
+            The gap between lines at 1500 and 15000 context shows performance degradation.
+        </div>
+
+        <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be dynamically inserted -->
+        </div>
+
+        <div class="legend-custom">
+            <h3>Legend</h3>
+            <div class="legend-items" id="legendItems">
+                <!-- Legend items will be dynamically inserted -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete benchmark data
+        const benchmarkData = {
+            m3_ultra: {
+                '0.8B': [
+                    { label: 'MLX 4-bit (Qwen3.5-0.8B)', impl: 'mlx', precision: '4bit', model: 'Qwen3.5-0.8B',
+                      ctx1500: 366.6, ctx15000: 314.8, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-0.8B)', impl: 'mlx', precision: '8bit', model: 'Qwen3.5-0.8B',
+                      ctx1500: 304.7, ctx15000: 267.0, color: '#34d399' },
+                    { label: 'MLX bf16 (Qwen3.5-0.8B)', impl: 'mlx', precision: 'bf16', model: 'Qwen3.5-0.8B',
+                      ctx1500: 226.7, ctx15000: 204.3, color: '#6ee7b7' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-0.8B)', impl: 'gguf', precision: 'Q8_0', model: 'Qwen3.5-0.8B',
+                      ctx1500: 203.9, ctx15000: 160.3, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-0.8B)', impl: 'gguf', precision: 'Q4_K_M', model: 'Qwen3.5-0.8B',
+                      ctx1500: 209.3, ctx15000: 165.9, color: '#f472b6' }
+                ],
+                '4B': [
+                    { label: 'MLX 4-bit (Qwen3.5-4B)', impl: 'mlx', precision: '4bit', model: 'Qwen3.5-4B',
+                      ctx1500: 156.1, ctx15000: 136.4, color: '#10b981' },
+                    { label: 'MLX 4-bit (Qwen3-4B)', impl: 'mlx', precision: '4bit', model: 'Qwen3-4B',
+                      ctx1500: 150.9, ctx15000: 99.2, color: '#34d399' },
+                    { label: 'MLX 8-bit (Qwen3.5-4B)', impl: 'mlx', precision: '8bit', model: 'Qwen3.5-4B',
+                      ctx1500: 105.4, ctx15000: 96.4, color: '#3b82f6' },
+                    { label: 'MLX 8-bit (Qwen3-4B)', impl: 'mlx', precision: '8bit', model: 'Qwen3-4B',
+                      ctx1500: 104.9, ctx15000: 77.8, color: '#60a5fa' },
+                    { label: 'MLX bf16 (Qwen3.5-4B)', impl: 'mlx', precision: 'bf16', model: 'Qwen3.5-4B',
+                      ctx1500: 65.0, ctx15000: 61.7, color: '#93c5fd' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-4B)', impl: 'gguf', precision: 'Q8_0', model: 'Qwen3.5-4B',
+                      ctx1500: 82.3, ctx15000: 68.0, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-4B)', impl: 'gguf', precision: 'Q4_K_M', model: 'Qwen3.5-4B',
+                      ctx1500: 98.7, ctx15000: 79.3, color: '#f472b6' },
+                    { label: 'GGUF Q8_0 (Qwen3-4B)', impl: 'gguf', precision: 'Q8_0', model: 'Qwen3-4B',
+                      ctx1500: 76.6, ctx15000: 34.6, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3-4B)', impl: 'gguf', precision: 'Q4_K_M', model: 'Qwen3-4B',
+                      ctx1500: 93.1, ctx15000: 37.4, color: '#f472b6' }
+                ],
+                '27B': [
+                    { label: 'MLX 4-bit (Qwen3.5-27B)', impl: 'mlx', precision: '4bit', model: 'Qwen3.5-27B',
+                      ctx1500: 36.3, ctx15000: 33.2, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-27B)', impl: 'mlx', precision: '8bit', model: 'Qwen3.5-27B',
+                      ctx1500: 21.6, ctx15000: 20.5, color: '#3b82f6' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-27B)', impl: 'gguf', precision: 'Q8_0', model: 'Qwen3.5-27B',
+                      ctx1500: 19.3, ctx15000: 17.2, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-27B)', impl: 'gguf', precision: 'Q4_K_M', model: 'Qwen3.5-27B',
+                      ctx1500: 26.8, ctx15000: 22.5, color: '#f472b6' }
+                ]
+            },
+            m4_pro: {
+                '0.8B': [
+                    { label: 'MLX 4-bit (Qwen3.5-0.8B)', impl: 'mlx', precision: '4bit', model: 'Qwen3.5-0.8B',
+                      ctx1500: 320.3, ctx15000: 251.5, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-0.8B)', impl: 'mlx', precision: '8bit', model: 'Qwen3.5-0.8B',
+                      ctx1500: 219.6, ctx15000: 186.4, color: '#34d399' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-0.8B)', impl: 'gguf', precision: 'Q8_0', model: 'Qwen3.5-0.8B',
+                      ctx1500: 108.5, ctx15000: 83.3, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-0.8B)', impl: 'gguf', precision: 'Q4_K_M', model: 'Qwen3.5-0.8B',
+                      ctx1500: 134.1, ctx15000: 97.4, color: '#f472b6' }
+                ],
+                '4B': [
+                    { label: 'MLX 4-bit (Qwen3.5-4B)', impl: 'mlx', precision: '4bit', model: 'Qwen3.5-4B',
+                      ctx1500: 83.3, ctx15000: 70.1, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-4B)', impl: 'mlx', precision: '8bit', model: 'Qwen3.5-4B',
+                      ctx1500: 49.0, ctx15000: 43.9, color: '#3b82f6' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-4B)', impl: 'gguf', precision: 'Q8_0', model: 'Qwen3.5-4B',
+                      ctx1500: 37.9, ctx15000: 30.0, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-4B)', impl: 'gguf', precision: 'Q4_K_M', model: 'Qwen3.5-4B',
+                      ctx1500: 45.6, ctx15000: 34.5, color: '#f472b6' }
+                ]
+            }
+        };
+
+        // Prompt TPS data (separate dataset)
+        const promptData = {
+            m3_ultra: {
+                '0.8B': [
+                    { label: 'MLX 4-bit (Qwen3.5-0.8B)', ctx1500: 12452.7, ctx15000: 11042.9, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-0.8B)', ctx1500: 12305.4, ctx15000: 11042.8, color: '#34d399' },
+                    { label: 'MLX bf16 (Qwen3.5-0.8B)', ctx1500: 13006.1, ctx15000: 11199.9, color: '#6ee7b7' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-0.8B)', ctx1500: 11692.9, ctx15000: 9154.3, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-0.8B)', ctx1500: 11080.7, ctx15000: 8800.2, color: '#f472b6' }
+                ],
+                '4B': [
+                    { label: 'MLX 4-bit (Qwen3.5-4B)', ctx1500: 2676.0, ctx15000: 2478.3, color: '#10b981' },
+                    { label: 'MLX 4-bit (Qwen3-4B)', ctx1500: 2742.2, ctx15000: 1872.8, color: '#34d399' },
+                    { label: 'MLX 8-bit (Qwen3.5-4B)', ctx1500: 2643.4, ctx15000: 2456.5, color: '#3b82f6' },
+                    { label: 'MLX 8-bit (Qwen3-4B)', ctx1500: 2695.6, ctx15000: 1855.6, color: '#60a5fa' },
+                    { label: 'MLX bf16 (Qwen3.5-4B)', ctx1500: 2575.9, ctx15000: 2481.9, color: '#93c5fd' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-4B)', ctx1500: 2505.2, ctx15000: 2152.3, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-4B)', ctx1500: 2365.3, ctx15000: 2055.0, color: '#f472b6' },
+                    { label: 'GGUF Q8_0 (Qwen3-4B)', ctx1500: 2476.8, ctx15000: 1216.3, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3-4B)', ctx1500: 2379.3, ctx15000: 1192.6, color: '#f472b6' }
+                ],
+                '27B': [
+                    { label: 'MLX 4-bit (Qwen3.5-27B)', ctx1500: 430.8, ctx15000: 416.0, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-27B)', ctx1500: 421.7, ctx15000: 411.2, color: '#3b82f6' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-27B)', ctx1500: 420.0, ctx15000: 388.5, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-27B)', ctx1500: 397.9, ctx15000: 368.4, color: '#f472b6' }
+                ]
+            },
+            m4_pro: {
+                '0.8B': [
+                    { label: 'MLX 4-bit (Qwen3.5-0.8B)', ctx1500: 3872.2, ctx15000: 3271.1, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-0.8B)', ctx1500: 3874.7, ctx15000: 3264.3, color: '#34d399' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-0.8B)', ctx1500: 3403.2, ctx15000: 2793.1, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-0.8B)', ctx1500: 3399.5, ctx15000: 2673.5, color: '#f472b6' }
+                ],
+                '4B': [
+                    { label: 'MLX 4-bit (Qwen3.5-4B)', ctx1500: 663.6, ctx15000: 609.2, color: '#10b981' },
+                    { label: 'MLX 8-bit (Qwen3.5-4B)', ctx1500: 658.4, ctx15000: 604.4, color: '#3b82f6' },
+                    { label: 'GGUF Q8_0 (Qwen3.5-4B)', ctx1500: 648.6, ctx15000: 556.3, color: '#ec4899' },
+                    { label: 'GGUF Q4_K_M (Qwen3.5-4B)', ctx1500: 611.9, ctx15000: 542.8, color: '#f472b6' }
+                ]
+            }
+        };
+
+        let chart;
+        let currentHardware = 'm3_ultra';
+        let currentSize = 'all';
+        let currentMetric = 'generation';
+
+        function getData() {
+            const hardware = currentHardware;
+            const size = currentSize;
+            const metric = currentMetric;
+            const dataset = metric === 'generation' ? benchmarkData[hardware] : promptData[hardware];
+
+            let entries = [];
+            if (size === 'all') {
+                Object.values(dataset).forEach(sizeData => {
+                    entries.push(...sizeData);
+                });
+            } else {
+                entries = dataset[size] || [];
+            }
+
+            return entries;
+        }
+
+        function calculateDegradation(entry) {
+            const drop = ((entry.ctx1500 - entry.ctx15000) / entry.ctx1500 * 100).toFixed(1);
+            return drop;
+        }
+
+        function updateStats(entries) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
+
+            // Group by model size
+            const sizes = currentSize === 'all' ? ['0.8B', '4B', '27B'] : [currentSize];
+            const hardwareName = currentHardware === 'm3_ultra' ? 'M3 Ultra' : 'M4 Pro';
+            const metricName = currentMetric === 'generation' ? 'Generation' : 'Prompt';
+
+            sizes.forEach(size => {
+                const sizeEntries = entries.filter(e => {
+                    const label = e.label.toLowerCase();
+                    if (size === '0.8B') return label.includes('0.8b');
+                    if (size === '4B') return label.includes('4b') && !label.includes('0.8b');
+                    if (size === '27B') return label.includes('27b');
+                    return false;
+                });
+
+                if (sizeEntries.length === 0) return;
+
+                // Find best performer at 1500 context
+                const best1500 = sizeEntries.reduce((best, e) => e.ctx1500 > best.ctx1500 ? e : best);
+                // Find worst degradation
+                const worstDeg = sizeEntries.reduce((worst, e) => {
+                    const deg = parseFloat(calculateDegradation(e));
+                    return deg > worst.deg ? { deg, entry: e } : worst;
+                }, { deg: 0, entry: null });
+
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h3>${size} Models (${hardwareName})</h3>
+                    <div class="stat-value">${best1500.ctx1500.toFixed(1)} TPS</div>
+                    <div class="stat-detail">Best: ${best1500.label} @ 1500 ctx</div>
+                    <div style="margin-top: 15px;">
+                        <div class="stat-value" style="font-size: 20px; color: ${worstDeg.entry ? worstDeg.entry.color : '#666'}">
+                            ${worstDeg.deg}%
+                        </div>
+                        <div class="stat-detail">Max degradation: ${worstDeg.entry ? worstDeg.entry.label : 'N/A'}</div>
+                    </div>
+                `;
+                statsGrid.appendChild(card);
+            });
+        }
+
+        function updateLegend(entries) {
+            const legendItems = document.getElementById('legendItems');
+            legendItems.innerHTML = '';
+
+            // Group by implementation
+            const mlxEntries = entries.filter(e => e.impl === 'mlx');
+            const ggufEntries = entries.filter(e => e.impl === 'gguf');
+
+            const addLegendItems = (items, title) => {
+                if (items.length > 0) {
+                    const group = document.createElement('div');
+                    group.innerHTML = `<strong style="margin-right: 10px;">${title}:</strong>`;
+                    items.forEach(item => {
+                        const legendItem = document.createElement('div');
+                        legendItem.className = 'legend-item';
+                        legendItem.innerHTML = `
+                            <div class="legend-color" style="background: ${item.color}"></div>
+                            <span>${item.label}</span>
+                        `;
+                        group.appendChild(legendItem);
+                    });
+                    legendItems.appendChild(group);
+                }
+            };
+
+            addLegendItems(mlxEntries, 'MLX');
+            addLegendItems(ggufEntries, 'GGUF');
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const entries = getData();
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            const datasets = entries.map(entry => ({
+                label: entry.label,
+                data: [entry.ctx1500, entry.ctx15000],
+                borderColor: entry.color,
+                backgroundColor: entry.color + '20',
+                borderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                tension: 0.3,
+                fill: false
+            }));
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1500 Context', '15000 Context'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Context Scaling: ${currentMetric === 'generation' ? 'Generation' : 'Prompt'} TPS`,
+                            font: { size: 18, weight: 'bold' }
+                        },
+                        legend: {
+                            display: false // We use custom legend
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    const entry = entries[context.datasetIndex];
+                                    const degradation = calculateDegradation(entry);
+                                    return [
+                                        `TPS @ 1500: ${entry.ctx1500.toFixed(1)}`,
+                                        `TPS @ 15000: ${entry.ctx15000.toFixed(1)}`,
+                                        `Degradation: ${degradation}%`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Context Length',
+                                font: { size: 14, weight: '600' }
+                            },
+                            grid: { display: false }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Tokens per Second (TPS)',
+                                font: { size: 14, weight: '600' }
+                            },
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
+
+            updateStats(entries);
+            updateLegend(entries);
+        }
+
+        // Event listeners
+        document.getElementById('hardwareSelect').addEventListener('change', (e) => {
+            currentHardware = e.target.value;
+            renderChart();
+        });
+
+        document.getElementById('sizeSelect').addEventListener('change', (e) => {
+            currentSize = e.target.value;
+            renderChart();
+        });
+
+        document.getElementById('metricSelect').addEventListener('change', (e) => {
+            currentMetric = e.target.value;
+            renderChart();
+        });
+
+        // Initial render
+        renderChart();
+    </script>
+</body>
+</html>

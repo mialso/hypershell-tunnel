@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLX vs GGUF Performance Comparison - 1500 Prompt Generation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin-bottom: 40px;
+        }
+        .summary {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .summary h2 {
+            margin-top: 0;
+            color: #495057;
+            font-size: 20px;
+        }
+        .summary table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .summary th, .summary td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .summary th {
+            background: #e9ecef;
+            font-weight: 600;
+            color: #495057;
+        }
+        .summary tr:hover {
+            background: #f1f3f4;
+        }
+        .improvement {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .hardware-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .badge-m3ultra {
+            background: #ff6b6b;
+            color: white;
+        }
+        .badge-m4pro {
+            background: #4ecdc4;
+            color: white;
+        }
+        .model-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            background: #e3f2fd;
+            color: #1976d2;
+            margin: 2px;
+        }
+        .legend-custom {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MLX vs GGUF Performance Comparison</h1>
+        <div class="subtitle">
+            Generation TPS (tokens/sec) with 1500 tokens at 1500 context<br>
+            Comparing 4-bit quantized models on Apple Silicon
+        </div>
+
+        <div class="legend-custom">
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgba(75, 192, 192, 0.8);"></div>
+                <span>MLX 4-bit</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgba(255, 99, 132, 0.8);"></div>
+                <span>GGUF Q4_K_M</span>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+        </div>
+
+        <div class="summary">
+            <h2>Performance Summary</h2>
+            <p>This chart compares generation throughput (tokens per second) for 1500 tokens generated at 1500 context length.
+            All models use 4-bit quantization for fair comparison. MLX consistently outperforms GGUF, with the advantage
+            increasing with model size.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hardware</th>
+                        <th>Model</th>
+                        <th>MLX 4-bit (TPS)</th>
+                        <th>GGUF Q4_K_M (TPS)</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="hardware-badge badge-m3ultra">M3 Ultra</span></td>
+                        <td><span class="model-badge">Qwen3.5-0.8B</span></td>
+                        <td>366.6</td>
+                        <td>209.3</td>
+                        <td class="improvement">+75.1%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="hardware-badge badge-m3ultra">M3 Ultra</span></td>
+                        <td><span class="model-badge">Qwen3.5-4B</span></td>
+                        <td>156.1</td>
+                        <td>98.73</td>
+                        <td class="improvement">+58.1%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="hardware-badge badge-m3ultra">M3 Ultra</span></td>
+                        <td><span class="model-badge">Qwen3.5-27B</span></td>
+                        <td>36.30</td>
+                        <td>26.76</td>
+                        <td class="improvement">+35.7%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="hardware-badge badge-m4pro">M4 Pro</span></td>
+                        <td><span class="model-badge">Qwen3.5-0.8B</span></td>
+                        <td>320.3</td>
+                        <td>134.1</td>
+                        <td class="improvement">+138.8%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="hardware-badge badge-m4pro">M4 Pro</span></td>
+                        <td><span class="model-badge">Qwen3.5-4B</span></td>
+                        <td>83.29</td>
+                        <td>45.55</td>
+                        <td class="improvement">+82.9%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                <strong>Key Findings:</strong><br>
+                • MLX shows 36-139% higher generation throughput compared to GGUF<br>
+                • Performance advantage is more pronounced on M4 Pro hardware<br>
+                • Larger models (27B) show smaller absolute improvement but still significant<br>
+                • All benchmarks conducted with 1500 token generation at 1500 context
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script>
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+
+        const improvementData = [75.1, 58.1, 35.7, 138.8, 82.9]; // Improvement percentages
+
+        const data = {
+            labels: [
+                'M3 Ultra: Qwen3.5-0.8B',
+                'M3 Ultra: Qwen3.5-4B',
+                'M3 Ultra: Qwen3.5-27B',
+                'M4 Pro: Qwen3.5-0.8B',
+                'M4 Pro: Qwen3.5-4B'
+            ],
+            datasets: [
+                {
+                    label: 'MLX 4-bit',
+                    data: [366.6, 156.1, 36.30, 320.3, 83.29],
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                },
+                {
+                    label: 'GGUF Q4_K_M',
+                    data: [209.3, 98.73, 26.76, 134.1, 45.55],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }
+            ]
+        };
+
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y} TPS`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: function(context) {
+                            // Only show on MLX bars (first dataset)
+                            return context.datasetIndex === 0;
+                        },
+                        color: 'white',
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        },
+                        formatter: function(value, context) {
+                            const index = context.dataIndex;
+                            return `+${improvementData[index]}%`;
+                        },
+                        anchor: 'end',
+                        align: 'top',
+                        offset: -10,
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        borderRadius: 4,
+                        padding: {
+                            top: 4,
+                            bottom: 4,
+                            left: 8,
+                            right: 8
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { size: 12 },
+                            color: '#666'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Generation TPS (tokens/sec)',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#333'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.06)'
+                        },
+                        ticks: {
+                            font: { size: 12 },
+                            color: '#666'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [ChartDataLabels]
+        };
+
+        new Chart(ctx, config);
+    </script>
+</body>
+</html>

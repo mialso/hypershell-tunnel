@@ -40,14 +40,6 @@
   Averages: prompt_tps=1855.621, generation_tps=77.759, peak_memory=7.062
 ```
 
-* mlx-community/Qwen3-4B-6bit
-```bash
-% mlx_lm.benchmark --model mlx-community/Qwen3-4B-6bit -p 1500 -g 1500 -n 2
-  Averages: prompt_tps=2646.753, generation_tps=118.880, peak_memory=4.273
-% mlx_lm.benchmark --model mlx-community/Qwen3-4B-6bit -p 15000 -g 1500 -n 2
-  Averages: prompt_tps=1833.012, generation_tps=84.403, peak_memory=6.190
-```
-
 * mlx-community/Qwen3-4B-4bit
 ```bash
 % mlx_lm.benchmark --model mlx-community/Qwen3-4B-4bit -p 1500 -g 1500 -n 2
