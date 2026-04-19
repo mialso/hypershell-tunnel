@@ -61,3 +61,8 @@ npm run copy:llm-host @llm-host:/Users/me/.cache/huggingface/hub/models--mlx-com
 ipconfig getifaddr en1
 rsync -ahP user@192.168.68.108:/Users/user/.cache/huggingface/hub/models--mlx-community--Qwen3.5-4B-8bit ~/.cache/huggingface/hub/
 ```
+
+### Git server
+```bash
+git daemon --reuseaddr --verbose --base-path=/Users/user/storage/git --export-all --listen=127.0.0.1 --port=9094 --enable=receive-pack /Users/user/storage/git
+```
